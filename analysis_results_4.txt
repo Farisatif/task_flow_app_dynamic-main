@@ -1,0 +1,23 @@
+Analyzing task_flow_app_dynamic...                              
+
+warning • The operand can't be null, so the condition is always 'false' • lib/core/database/database.g.dart:5964:23 • unnecessary_null_comparison
+warning • The '!' will have no effect because the receiver can't be null • lib/core/database/database.g.dart:5966:42 • unnecessary_non_null_assertion
+warning • The operand can't be null, so the condition is always 'false' • lib/core/database/database.g.dart:8684:24 • unnecessary_null_comparison
+warning • The '!' will have no effect because the receiver can't be null • lib/core/database/database.g.dart:8686:43 • unnecessary_non_null_assertion
+   info • Use 'const' for final variables initialized to a constant value • lib/screens/achievements_screen.dart:36:11 • prefer_const_declarations
+   info • Use 'const' with the constructor to improve performance • lib/screens/backup_sync_screen.dart:42:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/backup_sync_screen.dart:44:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/performance_reports_screen.dart:60:11 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/performance_reports_screen.dart:61:23 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/screens/performance_reports_screen.dart:62:15 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/performance_reports_screen.dart:62:31 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/performance_reports_screen.dart:64:15 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/performance_reports_screen.dart:64:31 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/settings_screen.dart:75:13 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/settings_screen.dart:82:13 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/settings_screen.dart:83:13 • prefer_const_constructors
+   info • Don't use 'BuildContext's across async gaps • lib/screens/task_form_screen.dart:140:13 • use_build_context_synchronously
+   info • Use 'const' with the constructor to improve performance • lib/screens/today_screen.dart:69:74 • prefer_const_constructors
+   info • The private field _endTime could be 'final' • lib/widgets/quick_add_modal.dart:31:13 • prefer_final_fields
+
+19 issues found. (ran in 2.9s)

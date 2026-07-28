@@ -1,0 +1,60 @@
+{
+  "elements": {
+    "ProjectsDao": {
+      "id": {
+        "library_uri": "package:task_flow_app/core/database/dao/projects_dao.dart",
+        "name": "ProjectsDao"
+      },
+      "declaration": {
+        "source_uri": "package:task_flow_app/core/database/dao/projects_dao.dart",
+        "offset": 568,
+        "name": "ProjectsDao"
+      },
+      "references": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "projects"
+        },
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "tasks"
+        }
+      ],
+      "type": "dao",
+      "tables": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "projects"
+        },
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "tasks"
+        }
+      ],
+      "views": [],
+      "includes": [],
+      "queries": [],
+      "dart_type": {
+        "elements": [
+          {
+            "lexeme": "ProjectsDao",
+            "import_uri": "package:task_flow_app/core/database/dao/projects_dao.dart"
+          }
+        ]
+      },
+      "database": {
+        "elements": [
+          {
+            "lexeme": "AppDatabase",
+            "import_uri": "package:task_flow_app/core/database/database.dart"
+          }
+        ]
+      }
+    }
+  },
+  "imports": [
+    "package:drift/drift.dart",
+    "package:task_flow_app/core/database/database.dart",
+    "package:task_flow_app/core/database/tables.dart"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "elements": {
+    "CategoriesDao": {
+      "id": {
+        "library_uri": "package:task_flow_app/core/database/dao/categories_dao.dart",
+        "name": "CategoriesDao"
+      },
+      "declaration": {
+        "source_uri": "package:task_flow_app/core/database/dao/categories_dao.dart",
+        "offset": 162,
+        "name": "CategoriesDao"
+      },
+      "references": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "categories"
+        }
+      ],
+      "type": "dao",
+      "tables": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "categories"
+        }
+      ],
+      "views": [],
+      "includes": [],
+      "queries": [],
+      "dart_type": {
+        "elements": [
+          {
+            "lexeme": "CategoriesDao",
+            "import_uri": "package:task_flow_app/core/database/dao/categories_dao.dart"
+          }
+        ]
+      },
+      "database": {
+        "elements": [
+          {
+            "lexeme": "AppDatabase",
+            "import_uri": "package:task_flow_app/core/database/database.dart"
+          }
+        ]
+      }
+    }
+  },
+  "imports": [
+    "package:drift/drift.dart",
+    "package:task_flow_app/core/database/database.dart",
+    "package:task_flow_app/core/database/tables.dart"
+  ]
+}

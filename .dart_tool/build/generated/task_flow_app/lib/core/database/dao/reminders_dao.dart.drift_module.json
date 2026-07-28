@@ -1,0 +1,52 @@
+{
+  "elements": {
+    "RemindersDao": {
+      "id": {
+        "library_uri": "package:task_flow_app/core/database/dao/reminders_dao.dart",
+        "name": "RemindersDao"
+      },
+      "declaration": {
+        "source_uri": "package:task_flow_app/core/database/dao/reminders_dao.dart",
+        "offset": 160,
+        "name": "RemindersDao"
+      },
+      "references": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "reminders"
+        }
+      ],
+      "type": "dao",
+      "tables": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "reminders"
+        }
+      ],
+      "views": [],
+      "includes": [],
+      "queries": [],
+      "dart_type": {
+        "elements": [
+          {
+            "lexeme": "RemindersDao",
+            "import_uri": "package:task_flow_app/core/database/dao/reminders_dao.dart"
+          }
+        ]
+      },
+      "database": {
+        "elements": [
+          {
+            "lexeme": "AppDatabase",
+            "import_uri": "package:task_flow_app/core/database/database.dart"
+          }
+        ]
+      }
+    }
+  },
+  "imports": [
+    "package:drift/drift.dart",
+    "package:task_flow_app/core/database/database.dart",
+    "package:task_flow_app/core/database/tables.dart"
+  ]
+}

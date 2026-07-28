@@ -1,0 +1,52 @@
+{
+  "elements": {
+    "SettingsDao": {
+      "id": {
+        "library_uri": "package:task_flow_app/core/database/dao/settings_dao.dart",
+        "name": "SettingsDao"
+      },
+      "declaration": {
+        "source_uri": "package:task_flow_app/core/database/dao/settings_dao.dart",
+        "offset": 318,
+        "name": "SettingsDao"
+      },
+      "references": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "app_settings"
+        }
+      ],
+      "type": "dao",
+      "tables": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "app_settings"
+        }
+      ],
+      "views": [],
+      "includes": [],
+      "queries": [],
+      "dart_type": {
+        "elements": [
+          {
+            "lexeme": "SettingsDao",
+            "import_uri": "package:task_flow_app/core/database/dao/settings_dao.dart"
+          }
+        ]
+      },
+      "database": {
+        "elements": [
+          {
+            "lexeme": "AppDatabase",
+            "import_uri": "package:task_flow_app/core/database/database.dart"
+          }
+        ]
+      }
+    }
+  },
+  "imports": [
+    "package:drift/drift.dart",
+    "package:task_flow_app/core/database/database.dart",
+    "package:task_flow_app/core/database/tables.dart"
+  ]
+}

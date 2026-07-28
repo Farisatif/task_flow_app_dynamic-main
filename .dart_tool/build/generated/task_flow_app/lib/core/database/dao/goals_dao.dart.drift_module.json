@@ -1,0 +1,60 @@
+{
+  "elements": {
+    "GoalsDao": {
+      "id": {
+        "library_uri": "package:task_flow_app/core/database/dao/goals_dao.dart",
+        "name": "GoalsDao"
+      },
+      "declaration": {
+        "source_uri": "package:task_flow_app/core/database/dao/goals_dao.dart",
+        "offset": 162,
+        "name": "GoalsDao"
+      },
+      "references": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "goals"
+        },
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "sub_goals"
+        }
+      ],
+      "type": "dao",
+      "tables": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "goals"
+        },
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "sub_goals"
+        }
+      ],
+      "views": [],
+      "includes": [],
+      "queries": [],
+      "dart_type": {
+        "elements": [
+          {
+            "lexeme": "GoalsDao",
+            "import_uri": "package:task_flow_app/core/database/dao/goals_dao.dart"
+          }
+        ]
+      },
+      "database": {
+        "elements": [
+          {
+            "lexeme": "AppDatabase",
+            "import_uri": "package:task_flow_app/core/database/database.dart"
+          }
+        ]
+      }
+    }
+  },
+  "imports": [
+    "package:drift/drift.dart",
+    "package:task_flow_app/core/database/database.dart",
+    "package:task_flow_app/core/database/tables.dart"
+  ]
+}

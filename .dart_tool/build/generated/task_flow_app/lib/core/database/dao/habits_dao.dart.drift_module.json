@@ -1,0 +1,60 @@
+{
+  "elements": {
+    "HabitsDao": {
+      "id": {
+        "library_uri": "package:task_flow_app/core/database/dao/habits_dao.dart",
+        "name": "HabitsDao"
+      },
+      "declaration": {
+        "source_uri": "package:task_flow_app/core/database/dao/habits_dao.dart",
+        "offset": 419,
+        "name": "HabitsDao"
+      },
+      "references": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "habits"
+        },
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "habit_logs"
+        }
+      ],
+      "type": "dao",
+      "tables": [
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "habits"
+        },
+        {
+          "library_uri": "package:task_flow_app/core/database/tables.dart",
+          "name": "habit_logs"
+        }
+      ],
+      "views": [],
+      "includes": [],
+      "queries": [],
+      "dart_type": {
+        "elements": [
+          {
+            "lexeme": "HabitsDao",
+            "import_uri": "package:task_flow_app/core/database/dao/habits_dao.dart"
+          }
+        ]
+      },
+      "database": {
+        "elements": [
+          {
+            "lexeme": "AppDatabase",
+            "import_uri": "package:task_flow_app/core/database/database.dart"
+          }
+        ]
+      }
+    }
+  },
+  "imports": [
+    "package:drift/drift.dart",
+    "package:task_flow_app/core/database/database.dart",
+    "package:task_flow_app/core/database/tables.dart"
+  ]
+}
