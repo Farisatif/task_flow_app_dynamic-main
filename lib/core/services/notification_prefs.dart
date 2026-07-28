@@ -1,7 +1,13 @@
 import 'dart:convert';
 
-/// الأصوات المتاحة للتذكيرات (تُعرض للمستخدم، وتُستخدم كقناة إشعار مختلفة على أندرويد)
-enum AppNotificationSound { defaultSound, chime, gentle, alert, silent }
+/// الأصوات المتاحة للتذكيرات
+enum AppNotificationSound {
+  defaultSound,
+  chime,
+  gentle,
+  alert,
+  silent
+}
 
 extension AppNotificationSoundLabel on AppNotificationSound {
   String get label => switch (this) {
@@ -15,8 +21,7 @@ extension AppNotificationSoundLabel on AppNotificationSound {
   String get channelId => 'reminders_${name}_v1';
 }
 
-/// تفضيلات الإشعارات والأصوات الخاصة بالتطبيق بالكامل، مخزّنة كـ JSON واحد
-/// في جدول الإعدادات (مفتاح: notification_prefs)
+/// تفضيلات الإشعارات والأصوات
 class NotificationPrefs {
   final bool remindersEnabled;
   final AppNotificationSound defaultSound;
@@ -28,7 +33,7 @@ class NotificationPrefs {
   final bool quietHoursEnabled;
   final int quietStartHour;
   final int quietEndHour;
-  final bool highPrioritySoundOverride; // المهام العالية الأولوية تتجاوز الساعات الهادئة
+  final bool highPrioritySoundOverride;
 
   const NotificationPrefs({
     this.remindersEnabled = true,
@@ -58,17 +63,29 @@ class NotificationPrefs {
     bool? highPrioritySoundOverride,
   }) {
     return NotificationPrefs(
-      remindersEnabled: remindersEnabled ?? this.remindersEnabled,
-      defaultSound: defaultSound ?? this.defaultSound,
-      defaultLeadMinutes: defaultLeadMinutes ?? this.defaultLeadMinutes,
-      vibrate: vibrate ?? this.vibrate,
-      dailySummaryEnabled: dailySummaryEnabled ?? this.dailySummaryEnabled,
-      dailySummaryHour: dailySummaryHour ?? this.dailySummaryHour,
-      dailySummaryMinute: dailySummaryMinute ?? this.dailySummaryMinute,
-      quietHoursEnabled: quietHoursEnabled ?? this.quietHoursEnabled,
-      quietStartHour: quietStartHour ?? this.quietStartHour,
-      quietEndHour: quietEndHour ?? this.quietEndHour,
-      highPrioritySoundOverride: highPrioritySoundOverride ?? this.highPrioritySoundOverride,
+      remindersEnabled:
+          remindersEnabled ?? this.remindersEnabled,
+      defaultSound:
+          defaultSound ?? this.defaultSound,
+      defaultLeadMinutes:
+          defaultLeadMinutes ?? this.defaultLeadMinutes,
+      vibrate:
+          vibrate ?? this.vibrate,
+      dailySummaryEnabled:
+          dailySummaryEnabled ?? this.dailySummaryEnabled,
+      dailySummaryHour:
+          dailySummaryHour ?? this.dailySummaryHour,
+      dailySummaryMinute:
+          dailySummaryMinute ?? this.dailySummaryMinute,
+      quietHoursEnabled:
+          quietHoursEnabled ?? this.quietHoursEnabled,
+      quietStartHour:
+          quietStartHour ?? this.quietStartHour,
+      quietEndHour:
+          quietEndHour ?? this.quietEndHour,
+      highPrioritySoundOverride:
+          highPrioritySoundOverride ??
+              this.highPrioritySoundOverride,
     );
   }
 
@@ -83,41 +100,83 @@ class NotificationPrefs {
         'quietHoursEnabled': quietHoursEnabled,
         'quietStartHour': quietStartHour,
         'quietEndHour': quietEndHour,
-        'highPrioritySoundOverride': highPrioritySoundOverride,
+        'highPrioritySoundOverride':
+            highPrioritySoundOverride,
       };
 
   String toJson() => jsonEncode(toMap());
 
   factory NotificationPrefs.fromJson(String? source) {
-    if (source == null || source.isEmpty) return const NotificationPrefs();
+    if (source == null || source.isEmpty) {
+      return const NotificationPrefs();
+    }
+
     try {
-      final map = jsonDecode(source) as Map<String, dynamic>;
+      final map =
+          jsonDecode(source) as Map<String, dynamic>;
+
+      final soundIndex =
+          (map['defaultSound'] as int? ?? 0)
+              .clamp(
+                0,
+                AppNotificationSound.values.length - 1,
+              );
+
       return NotificationPrefs(
-        remindersEnabled: map['remindersEnabled'] as bool? ?? true,
-        defaultSound: AppNotificationSound.values[(map['defaultSound'] as int?) ?? 0],
-        defaultLeadMinutes: map['defaultLeadMinutes'] as int? ?? 10,
-        vibrate: map['vibrate'] as bool? ?? true,
-        dailySummaryEnabled: map['dailySummaryEnabled'] as bool? ?? false,
-        dailySummaryHour: map['dailySummaryHour'] as int? ?? 8,
-        dailySummaryMinute: map['dailySummaryMinute'] as int? ?? 0,
-        quietHoursEnabled: map['quietHoursEnabled'] as bool? ?? false,
-        quietStartHour: map['quietStartHour'] as int? ?? 22,
-        quietEndHour: map['quietEndHour'] as int? ?? 7,
-        highPrioritySoundOverride: map['highPrioritySoundOverride'] as bool? ?? true,
+        remindersEnabled:
+            map['remindersEnabled'] as bool? ?? true,
+
+        defaultSound:
+            AppNotificationSound.values[soundIndex],
+
+        defaultLeadMinutes:
+            map['defaultLeadMinutes'] as int? ?? 10,
+
+        vibrate:
+            map['vibrate'] as bool? ?? true,
+
+        dailySummaryEnabled:
+            map['dailySummaryEnabled'] as bool? ?? false,
+
+        dailySummaryHour:
+            map['dailySummaryHour'] as int? ?? 8,
+
+        dailySummaryMinute:
+            map['dailySummaryMinute'] as int? ?? 0,
+
+        quietHoursEnabled:
+            map['quietHoursEnabled'] as bool? ?? false,
+
+        quietStartHour:
+            map['quietStartHour'] as int? ?? 22,
+
+        quietEndHour:
+            map['quietEndHour'] as int? ?? 7,
+
+        highPrioritySoundOverride:
+            map['highPrioritySoundOverride'] as bool? ??
+                true,
       );
     } catch (_) {
       return const NotificationPrefs();
     }
   }
 
-  /// هل هذه اللحظة (ساعة) تقع ضمن الساعات الهادئة؟ يدعم النطاق العابر لمنتصف الليل
+  /// هل الوقت الحالي ضمن الساعات الهادئة؟
   bool isWithinQuietHours(int hour) {
     if (!quietHoursEnabled) return false;
-    if (quietStartHour == quietEndHour) return false;
-    if (quietStartHour < quietEndHour) {
-      return hour >= quietStartHour && hour < quietEndHour;
+
+    if (quietStartHour == quietEndHour) {
+      return false;
     }
-    // نطاق عابر لمنتصف الليل، مثل 22 -> 7
-    return hour >= quietStartHour || hour < quietEndHour;
+
+    if (quietStartHour < quietEndHour) {
+      return hour >= quietStartHour &&
+          hour < quietEndHour;
+    }
+
+    // مثال: 22 -> 7
+    return hour >= quietStartHour ||
+        hour < quietEndHour;
   }
 }
