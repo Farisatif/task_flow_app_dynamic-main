@@ -1,182 +1,325 @@
-import 'dart:convert';
+import 'dart:io';
 
-/// الأصوات المتاحة للتذكيرات
-enum AppNotificationSound {
-  defaultSound,
-  chime,
-  gentle,
-  alert,
-  silent
-}
+import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tzdata;
 
-extension AppNotificationSoundLabel on AppNotificationSound {
-  String get label => switch (this) {
-        AppNotificationSound.defaultSound => 'الافتراضي',
-        AppNotificationSound.chime => 'جرس هادئ',
-        AppNotificationSound.gentle => 'نغمة لطيفة',
-        AppNotificationSound.alert => 'تنبيه واضح',
-        AppNotificationSound.silent => 'صامت (اهتزاز فقط)',
-      };
+import 'notification_prefs.dart';
 
-  String get channelId => 'reminders_${name}_v1';
-}
+class NotificationService {
+  NotificationService._();
 
-/// تفضيلات الإشعارات والأصوات
-class NotificationPrefs {
-  final bool remindersEnabled;
-  final AppNotificationSound defaultSound;
-  final int defaultLeadMinutes;
-  final bool vibrate;
-  final bool dailySummaryEnabled;
-  final int dailySummaryHour;
-  final int dailySummaryMinute;
-  final bool quietHoursEnabled;
-  final int quietStartHour;
-  final int quietEndHour;
-  final bool highPrioritySoundOverride;
+  static final NotificationService instance =
+      NotificationService._();
 
-  const NotificationPrefs({
-    this.remindersEnabled = true,
-    this.defaultSound = AppNotificationSound.defaultSound,
-    this.defaultLeadMinutes = 10,
-    this.vibrate = true,
-    this.dailySummaryEnabled = false,
-    this.dailySummaryHour = 8,
-    this.dailySummaryMinute = 0,
-    this.quietHoursEnabled = false,
-    this.quietStartHour = 22,
-    this.quietEndHour = 7,
-    this.highPrioritySoundOverride = true,
-  });
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
 
-  NotificationPrefs copyWith({
-    bool? remindersEnabled,
-    AppNotificationSound? defaultSound,
-    int? defaultLeadMinutes,
-    bool? vibrate,
-    bool? dailySummaryEnabled,
-    int? dailySummaryHour,
-    int? dailySummaryMinute,
-    bool? quietHoursEnabled,
-    int? quietStartHour,
-    int? quietEndHour,
-    bool? highPrioritySoundOverride,
+  bool _initialized = false;
+
+  static const int dailySummaryNotificationId = 999999;
+
+  Future<void> init() async {
+    if (_initialized) return;
+
+    tzdata.initializeTimeZones();
+
+    const androidInit =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const iosInit = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
+
+    await _plugin.initialize(
+      const InitializationSettings(
+        android: androidInit,
+        iOS: iosInit,
+      ),
+    );
+
+    if (Platform.isAndroid) {
+      final androidPlugin =
+          _plugin.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+
+      for (final sound in AppNotificationSound.values) {
+        await androidPlugin?.createNotificationChannel(
+          AndroidNotificationChannel(
+            sound.channelId,
+            'تذكيرات - ${sound.label}',
+            description:
+                'قناة إشعارات التذكيرات',
+            importance:
+                sound == AppNotificationSound.silent
+                    ? Importance.low
+                    : Importance.high,
+            playSound:
+                sound != AppNotificationSound.silent,
+            enableVibration:
+                sound != AppNotificationSound.silent,
+          ),
+        );
+      }
+    }
+
+    _initialized = true;
+  }
+
+
+  Future<bool> requestPermissions() async {
+    if (Platform.isIOS) {
+      final iosPlugin =
+          _plugin.resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>();
+
+      final granted =
+          await iosPlugin?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      return granted ?? false;
+    }
+
+
+    if (Platform.isAndroid) {
+      final status =
+          await Permission.notification.request();
+
+      if (await Permission.scheduleExactAlarm.isDenied) {
+        await Permission.scheduleExactAlarm.request();
+      }
+
+      return status.isGranted;
+    }
+
+
+    return true;
+  }
+
+
+  Future<bool> hasPermission() async {
+
+    if (Platform.isAndroid) {
+      return Permission.notification.isGranted;
+    }
+
+    if (Platform.isIOS) {
+      final result =
+          await _plugin
+              .resolvePlatformSpecificImplementation<
+                  IOSFlutterLocalNotificationsPlugin>()
+              ?.checkPermissions();
+
+      return result?.isEnabled ?? false;
+    }
+
+    return true;
+  }
+
+
+
+  NotificationDetails _details(
+    AppNotificationSound sound, {
+    bool vibrate = true,
   }) {
-    return NotificationPrefs(
-      remindersEnabled:
-          remindersEnabled ?? this.remindersEnabled,
-      defaultSound:
-          defaultSound ?? this.defaultSound,
-      defaultLeadMinutes:
-          defaultLeadMinutes ?? this.defaultLeadMinutes,
-      vibrate:
-          vibrate ?? this.vibrate,
-      dailySummaryEnabled:
-          dailySummaryEnabled ?? this.dailySummaryEnabled,
-      dailySummaryHour:
-          dailySummaryHour ?? this.dailySummaryHour,
-      dailySummaryMinute:
-          dailySummaryMinute ?? this.dailySummaryMinute,
-      quietHoursEnabled:
-          quietHoursEnabled ?? this.quietHoursEnabled,
-      quietStartHour:
-          quietStartHour ?? this.quietStartHour,
-      quietEndHour:
-          quietEndHour ?? this.quietEndHour,
-      highPrioritySoundOverride:
-          highPrioritySoundOverride ??
-              this.highPrioritySoundOverride,
+
+    return NotificationDetails(
+
+      android: AndroidNotificationDetails(
+        sound.channelId,
+        'تذكيرات - ${sound.label}',
+        channelDescription:
+            'إشعارات تذكير المهام',
+
+        importance:
+            sound == AppNotificationSound.silent
+                ? Importance.low
+                : Importance.high,
+
+        priority:
+            sound == AppNotificationSound.silent
+                ? Priority.low
+                : Priority.high,
+
+        playSound:
+            sound != AppNotificationSound.silent,
+
+        enableVibration:
+            vibrate &&
+                sound != AppNotificationSound.silent,
+
+        category:
+            AndroidNotificationCategory.reminder,
+      ),
+
+
+      iOS: DarwinNotificationDetails(
+        presentSound:
+            sound != AppNotificationSound.silent,
+        presentAlert: true,
+        presentBadge: true,
+      ),
     );
   }
 
-  Map<String, dynamic> toMap() => {
-        'remindersEnabled': remindersEnabled,
-        'defaultSound': defaultSound.index,
-        'defaultLeadMinutes': defaultLeadMinutes,
-        'vibrate': vibrate,
-        'dailySummaryEnabled': dailySummaryEnabled,
-        'dailySummaryHour': dailySummaryHour,
-        'dailySummaryMinute': dailySummaryMinute,
-        'quietHoursEnabled': quietHoursEnabled,
-        'quietStartHour': quietStartHour,
-        'quietEndHour': quietEndHour,
-        'highPrioritySoundOverride':
-            highPrioritySoundOverride,
-      };
 
-  String toJson() => jsonEncode(toMap());
 
-  factory NotificationPrefs.fromJson(String? source) {
-    if (source == null || source.isEmpty) {
-      return const NotificationPrefs();
-    }
+  tz.TZDateTime _toTz(DateTime dt) {
 
-    try {
-      final map =
-          jsonDecode(source) as Map<String, dynamic>;
+    final offset =
+        dt.timeZoneOffset;
 
-      final soundIndex =
-          (map['defaultSound'] as int? ?? 0)
-              .clamp(
-                0,
-                AppNotificationSound.values.length - 1,
-              );
+    final utc =
+        dt.subtract(offset);
 
-      return NotificationPrefs(
-        remindersEnabled:
-            map['remindersEnabled'] as bool? ?? true,
-
-        defaultSound:
-            AppNotificationSound.values[soundIndex],
-
-        defaultLeadMinutes:
-            map['defaultLeadMinutes'] as int? ?? 10,
-
-        vibrate:
-            map['vibrate'] as bool? ?? true,
-
-        dailySummaryEnabled:
-            map['dailySummaryEnabled'] as bool? ?? false,
-
-        dailySummaryHour:
-            map['dailySummaryHour'] as int? ?? 8,
-
-        dailySummaryMinute:
-            map['dailySummaryMinute'] as int? ?? 0,
-
-        quietHoursEnabled:
-            map['quietHoursEnabled'] as bool? ?? false,
-
-        quietStartHour:
-            map['quietStartHour'] as int? ?? 22,
-
-        quietEndHour:
-            map['quietEndHour'] as int? ?? 7,
-
-        highPrioritySoundOverride:
-            map['highPrioritySoundOverride'] as bool? ??
-                true,
-      );
-    } catch (_) {
-      return const NotificationPrefs();
-    }
+    return tz.TZDateTime.from(
+      utc,
+      tz.getLocation('UTC'),
+    ).add(offset);
   }
 
-  /// هل الوقت الحالي ضمن الساعات الهادئة؟
-  bool isWithinQuietHours(int hour) {
-    if (!quietHoursEnabled) return false;
 
-    if (quietStartHour == quietEndHour) {
-      return false;
+
+
+  Future<void> scheduleTaskReminder({
+    required int taskId,
+    required String title,
+    required String body,
+    required DateTime scheduledAt,
+    AppNotificationSound sound =
+        AppNotificationSound.defaultSound,
+    bool vibrate = true,
+  }) async {
+
+    await init();
+
+    if (scheduledAt.isBefore(DateTime.now())) {
+      return;
     }
 
-    if (quietStartHour < quietEndHour) {
-      return hour >= quietStartHour &&
-          hour < quietEndHour;
+
+    await _plugin.zonedSchedule(
+      taskId,
+      title,
+      body,
+      _toTz(scheduledAt),
+      _details(
+        sound,
+        vibrate: vibrate,
+      ),
+
+      androidAllowWhileIdle: true,
+
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation
+              .absoluteTime,
+    );
+  }
+
+
+
+
+
+  Future<void> cancelTaskReminder(
+      int taskId) async {
+
+    await init();
+    await _plugin.cancel(taskId);
+  }
+
+
+
+
+  Future<void> showTestNotification(
+    AppNotificationSound sound, {
+    bool vibrate = true,
+  }) async {
+
+    await init();
+
+    await _plugin.show(
+      -1,
+      'هذا مثال على تذكيراتك 🔔',
+      'الصوت المختار: ${sound.label}',
+      _details(
+        sound,
+        vibrate: vibrate,
+      ),
+    );
+  }
+
+
+
+
+
+  Future<void> scheduleDailySummary({
+    required int hour,
+    required int minute,
+    required AppNotificationSound sound,
+  }) async {
+
+    await init();
+
+    final now = DateTime.now();
+
+    var next = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+
+    if (next.isBefore(now)) {
+      next = next.add(
+        const Duration(days: 1),
+      );
     }
 
-    // مثال: 22 -> 7
-    return hour >= quietStartHour ||
-        hour < quietEndHour;
+
+
+    await _plugin.zonedSchedule(
+      dailySummaryNotificationId,
+      'ملخصك اليومي 📋',
+      'راجع مهامك المجدولة لهذا اليوم',
+      _toTz(next),
+      _details(sound),
+
+      androidAllowWhileIdle: true,
+
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation
+              .absoluteTime,
+
+      matchDateTimeComponents:
+          DateTimeComponents.time,
+    );
+  }
+
+
+
+
+
+  Future<void> cancelDailySummary() async {
+    await init();
+    await _plugin.cancel(
+      dailySummaryNotificationId,
+    );
+  }
+
+
+
+
+  Future<void> cancelAll() async {
+    await init();
+    await _plugin.cancelAll();
   }
 }
